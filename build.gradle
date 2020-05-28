@@ -2,6 +2,7 @@ plugins {
     id 'org.springframework.boot' version '2.3.0.RELEASE'
     id 'io.spring.dependency-management' version '1.0.9.RELEASE'
     id 'java'
+    id 'org.asciidoctor.convert' version '1.5.9.2'
 }
 
 group = 'com.kate'
@@ -12,10 +13,38 @@ repositories {
     mavenCentral()
 }
 
+asciidoctor {
+    dependsOn test
+}
+
+bootJar {
+    dependsOn asciidoctor
+    from ('${asciidoctor.outputDir}/html5') {
+        into 'static/docs'
+    }
+}
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.projectlombok:lombok'
+
+    runtimeOnly 'mysql:mysql-connector-java'
+
+    compile 'org.flywaydb:flyway-core'
+    compile 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.1'
+
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+    testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+}
+
+ext.profile = (!project.hasProperty('profile') || !profile) ? 'local' : profile
+sourceSets {
+    main {
+        resources {
+            srcDirs "src/main/resources", "src/main/resources-${profile}"
+        }
     }
 }
 
