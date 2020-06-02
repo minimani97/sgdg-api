@@ -6,9 +6,35 @@ branches:
   only:
     - master
 
+# Travis CI 서버의 HOME
+cache:
+  directories:
+    - '$HOME/.m2/repository'
+    - '$HOME/.gradle'
+
+script: "./gradlew clean build"
+
+before_deploy:
+  - zip -r sgdg-api *
+  - mkdir -p deploy
+  - mv sgdg-api.zip deploy/sgdg-api.zip
+
+deploy:
+  provider: S3
+  access_key_id:
+    secure: FVuGTro9ECeieCzasTmdLh2LZslrrDZkLME4MNKhHBNvMbYBi2rdxbawgXvczwSch4TMtcxWVrzwzT3LKotwl9mEBAvlnkZgNoWvM7nlPSsqAIe73BtwHtn5QBG/5Wp2NaMvSeM+c7/lot2moKFWFORv5fYITPISKoC9BtzPGMBpJQZuZvmZYvFxUtOqwRG30x+ZxQEBB/vZ71RP6rR3DakMNPwAKNaRoLYmDkaShiYxYCcgftOICrz0g8bt+YoN6lmXY5y25qrdHT+cm8fUKKQPVO8qEqZuBBaZHR+liljLzIHk+lrEzSS8jVmz/i3H3owjLyyJmbWRA5MeTQSIJn69eHmPG3Kv7Gj8fyS3J2gQQ7t7mZqzWBxwazN3s/VHJHDJGmZpnaL6BKFJxWBy2Bi0swE9rdS/gtd5NxjePQXFDPfy0dO9+PUllSBYFhUwyD4AcPDpISQe+Jo+nP7IvpIKmN/5yLJHOtdLaA5xx1gTqd1taqF9SbJtFk5/+zx+KUDKDcj9kar7Rxr9GxWIAs8ue3Vr8+cTCynAjK+ow1cW+LCZPiCGi8SFhbHCb26xjA9a92N588UBfPCqEGdydSiSgeTOlM6cHsXBNZIaG6M4gbzMy73dMxNMn8dbsfeLfPvzOSeDh5mmoN1Htc1HR9YfbfKNzbYONkjEyLT4lLU=
+  secret_key_id:
+    secure: ANwQTz4ekXLnPE7IsVYeStu+uBdz7I2N/VlYc3t+8iEgwXbmXyeRWKi5IMZ13Yuqsx+0IYd667FINamdn5hTPPTlhv9o6883SmbIzb9Wmq31kgI4/hDf5cFz+lcx6p2/e2aYMtQd6F8hObiFDOXORxU/UF7VhsczVTdavPndBCEHSonfnigW8Bho4oFmlkK8QSMItdHkuXGiP1yZkEV+R29getrMR1PQ/4PSb7YpDIiyg1lJgmtcxnAbLJsWG9AlCK/9sRZVW7tpVb20MjUWZY+PEp+186YWRMr+D3MbEhkzik2svGqCmW2jSUA9bt2Dz6r/IaJKtfABneyCIgpFenK8JwmM8jrePIY1zcFzGQB5l+ECoCrK+/CKisjFLFR6zqCtX4KjGTXf753utnWoJAYGQlazC3Dsz7jCtd2SC9ednh+wJ3VMFvihzyUvf5s+jDmPnZIRJtrmz8GFjzImGMlLHJ0v3wqsSfmppW3hXigjtyZ3Biwp5+VS5hFfPpyADdBJ9eCRxzIE+rKgTJjQt8ZxJY0O/EhbrtDelmp39LEF8gsMqtZIteiFBkM30w+2WIaFQ/WMCFjRKSzghw1nQGfTel8bvhN7aGaMJV4nrqOJr06sQTrHXfwqgZBRMiwycW2E13EjDdoR6VH6iV24iV4i2I3ei7P6kPcxCPC2kn0=
+  bucket: sgdg-api-deploy
+  region: ap-northeast-2
+  skip_cleanup: true
+  acl: public_read
+  local_dir: deploy
+  wait-until-deployed: true
+  on:
+    repo: minimani97/sgdg-api
+    branch: master
+
 notifications:
   slack:
     secure: XCXuCVYhOZUjheto1V3PBOMR2aenbnnq2loErv32Vam3XefRYA3e5P4iMkWBvZXirAAB8oWo/nWnbA4rby5wJbbfSRYLdH0yQ9thGkztDkmC6y14qPSYOCb+WqKUZ5f3WPq0yYJFYavzfd/VwFz4CHhs79JA4S2rQwQ4otfKSqJ6A04eOcw1F4lfCFuB8GdqMnYet5R0I6KllbmW7goZ8Y1xwu6c/yheP4jNza06P8BDLhifLnW9CD1K6id0T/1NZRoSngr/aaXVojnffGRd1UKA3WqKD2mmpPF9vkjl79UpT9t30AJKZKowa7DxH25PFq5byJ4tvlY3NJVgcjGCyTV/AVWV4Td2ch/1eE4v3KOHjf3DUEdIro1yhOOPrqm+EzADicKZCTEnYrmM5fjkVz1mw9lB65tyRAbbawqR+W63PdrkjjEUi3PZmg7HeQjf0eLVeJ0oM2jaw4/0rrewE7q4TZ9pHbnSzdpwjC8oJEC1tZYrJ1leUWFe4as8dnXTr15ZFbM60KUtkHu7AygKxI+e2wXZz32tBbJSoffHynOLytXJSP8Xuzgu656BgfuFcDKK8A387L6vp3R4u3nS8ZyqYIqYjUInEA2QEfAxCTRkyMcX2uPNl0LS68oBjpGF6SIWqAPJ9poE6AQXcavPFmKo2RwtC2PvJFqlBBvvVzU=
-    template:
-      - "%{repository_slug} (%{commit}) : %{message}"
-      - "Build details: %{build_url}"
