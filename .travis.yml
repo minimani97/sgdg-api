@@ -52,7 +52,7 @@ deploy:
     region: ap-northeast-2
     wait-until-deployed: true
     on:
-      repo: jojoldu/springboot-webservice
+      repo: minimani97/sgdg-api
       branch: master
 
 notifications:
